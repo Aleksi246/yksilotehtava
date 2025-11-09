@@ -1,5 +1,5 @@
-function greeting() {
-  console.log('Hello World!');
-}
+const left = document.querySelector('.left');
 
-greeting();
+for (let i = 0; i < 199; i++) {
+  left.innerHTML += `<p>paragraph${i + 1}</p>`;
+}
