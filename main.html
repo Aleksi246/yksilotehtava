@@ -7,7 +7,13 @@
 
     <title>menu checker</title>
 
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css"
+      rel="stylesheet"
+    />
+
     <script type="module" src="main.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
     <link rel="stylesheet" href="main.css" />
   </head>
 
@@ -18,9 +24,26 @@
         <button id="logreg">login/register</button>
       </div>
 
-      <div class="left"></div>
+      <div class="left">
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Address</th>
+          </tr>
+          <!-- add restaurants here -->
+        </table>
 
-      <div class="right">map here</div>
+        <dialog>
+          <!-- add restaurant info here when restaurant is clicked -->
+        </dialog>
+      </div>
+
+      <div class="right">
+        <div id="map"></div>
+      </div>
     </div>
+
+    <div id="logregmodal"></div>
+    <div id="restaurantinfomodal"></div>
   </body>
 </html>

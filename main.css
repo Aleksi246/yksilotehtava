@@ -1,19 +1,23 @@
 body {
   margin: 0;
   font-family: sans-serif;
+
+  height: 100vh;
 }
 
 .container {
   display: grid;
   grid-template-areas:
     'header header'
-    'menu content'
-    'footer footer';
-  grid-template-columns: 1fr 3fr;
+    'menu content';
+  grid-template-columns: 2fr 3fr;
   gap: 3px;
-  background-color: dodgerblue;
+  background-color: white;
   padding: 5px;
   height: 100vh;
+
+  grid-template-rows: auto 1fr;
+  box-sizing: border-box;
 }
 
 .top {
@@ -21,20 +25,50 @@ body {
   display: flex;
   justify-content: space-between;
   text-align: center;
-  background-color: red;
+  background-color: aqua;
 }
 
 .left {
   grid-area: menu;
-  background-color: yellow;
+  background-color: white;
   overflow-y: auto;
 }
 
 .right {
   grid-area: content;
   background-color: green;
-  overflow-y: auto;
+  overflow: hidden;
+  position: relative;
 }
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
 #logreg {
+  font-weight: bold;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0;
+  padding: 0;
+}
+
+th {
+  border-bottom: 1px solid #ccc;
+  font-weight: normal;
+  padding: 0.5em 1em;
+  text-align: left;
+}
+
+td {
+  border-bottom: 1px solid #ccc;
+  padding: 0.5em 1em;
+}
+
+.highlight {
+  background-color: aqua;
   font-weight: bold;
 }
