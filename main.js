@@ -5,17 +5,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 }).addTo(map);
 
-const table = document.querySelector('table');
-
-const dialog = document.querySelector('dialog');
-
-const button = document.createElement('button');
-button.innerText = 'close';
-
-button.addEventListener('click', () => {
-  dialog.innerHTML = '';
-  dialog.close();
-});
+const table = document.querySelector('#maintable');
 
 async function getDaily(id) {
   try {
@@ -41,32 +31,120 @@ async function getWeekly(id) {
   }
 }
 
-async function showRestaurantInfo(restaurantId) {
+async function getRestaurant(id) {
+  try {
+    const response = await fetch(
+      `https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants/${id}`
+    );
+    const restaurant = await response.json();
+    return restaurant;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function showRestaurantMenu(restaurantId) {
   for (let k of document.querySelectorAll('tr')) {
     k.classList.remove('highlight');
   }
   const row = document.querySelector(`tr[data-id="${restaurantId}"]`);
+  const nextRow = row.nextElementSibling;
+
   row.classList.add('highlight');
+  nextRow.classList.add('highlight');
+
+  if (nextRow.style.display === 'table-row') {
+    nextRow.style.display = 'none';
+  } else {
+    nextRow.style.display = 'table-row';
+  }
 
   const daily2 = await getDaily(restaurantId);
 
-  dialog.innerHTML = '';
+  console.log(daily2);
+  let menuHtml = `
+  <td colspan="2">
+    <table id="menuTable">
+      <tr>
+        <td>course name</td>
+        <td>price</td>
+        <td>diets</td>
+      </tr>
+      ${daily2.courses
+        .map(
+          (course) =>
+            `<tr><td>${course.name}</td><td>${course.price}</td><td>${course.diets}</td></tr>`
+        )
+        .join('')}
+    </table>
+  </td>
+`;
 
-  if (daily2.courses.length !== 0) {
-    console.log(daily2);
-    let menu = `<table><tr> <td>course name</td> <td>price</td> <td>diets</td> </tr>`;
-    for (let course of daily2.courses) {
-      menu += `<tr> <td>${course.name}</td><td>${course.price}</td><td>${course.diets}</td> </tr>`;
-    }
-    menu += '</table>';
-    dialog.innerHTML = menu;
-  }
+  nextRow.innerHTML = menuHtml;
 
-  //let innerhtml2 = `<p>${i.name}</p> <p>${i.address}</p> <p>${i.postalCode}</p> <p>${i.city}</p> <p>${i.phone}</p> <p>${i.company}</p>`;
+  const buttonRow = document.createElement('tr');
+  const buttonCell = document.createElement('td');
+  buttonCell.colSpan = 3;
 
-  //dialog.innerHTML += innerhtml2;
-  dialog.appendChild(button);
-  dialog.showModal();
+  const weeklyButton = document.createElement('button');
+  weeklyButton.textContent = 'weekly';
+  weeklyButton.id = 'weeklyButton';
+
+  let infobtn = document.createElement('button');
+  infobtn.textContent = 'info';
+
+  infobtn.addEventListener('click', async () => {
+    let infodialog = document.querySelector('#info');
+    let infoVariable = await getRestaurant(restaurantId);
+
+    infodialog.innerHTML = `<ul><li>Name: ${infoVariable.name}</li><li>Address: ${infoVariable.address}</li><li>City: ${infoVariable.city}</li><li>Phone: ${infoVariable.phone}</li><li>Company: ${infoVariable.company}</li></ul>`;
+
+    const closeButton2 = document.createElement('button');
+    closeButton2.textContent = 'close';
+    closeButton2.addEventListener('click', () => {
+      infodialog.close();
+    });
+    infodialog.appendChild(closeButton2);
+
+    infodialog.showModal();
+  });
+
+  weeklyButton.addEventListener('click', async () => {
+    const weeklyMenu = await getWeekly(restaurantId);
+    console.log(weeklyMenu);
+    const weeklyDialog = document.querySelector('#Weekly');
+
+    let weeklyhtml = '<h2>Weekly Menu</h2>';
+    weeklyMenu.days.forEach((day) => {
+      weeklyhtml += `<h3>${day.date}</h3><ul>`;
+      day.courses.forEach((course) => {
+        weeklyhtml += `<li><strong>${course.name}</strong>`;
+        if (course.price) weeklyhtml += ` - ${course.price}`;
+        if (course.diets.length > 0)
+          weeklyhtml += `<br>Diet: ${course.diets.join(', ')}`;
+        weeklyhtml += `</li>`;
+      });
+      weeklyhtml += '</ul>';
+    });
+
+    weeklyDialog.innerHTML = weeklyhtml;
+
+    const closeButton1 = document.createElement('button');
+    closeButton1.textContent = 'close';
+    closeButton1.addEventListener('click', () => {
+      weeklyDialog.close();
+    });
+    weeklyDialog.appendChild(closeButton1);
+
+    weeklyDialog.showModal();
+  });
+
+  buttonCell.appendChild(weeklyButton);
+  buttonCell.appendChild(infobtn);
+  buttonRow.appendChild(buttonCell);
+
+  const menuTable = nextRow.querySelector('#menuTable');
+  menuTable.appendChild(buttonRow);
 }
 
 async function getRestaurants() {
@@ -95,37 +173,14 @@ async function getRestaurants() {
       tr.innerHTML = `<td>${i.name}</td> <td>${i.address}</td>`;
       tr.dataset.id = i._id;
 
-      tr.addEventListener('click', () => showRestaurantInfo(i._id));
+      let tr2 = document.createElement('tr');
+      tr2.classList.add('hidden-row');
 
-      // Marker click
-      marker.on('click', () => showRestaurantInfo(i._id));
-      /*
-      tr.addEventListener('click', async () => {
-        for (let k of document.querySelectorAll('tr')) {
-          k.classList.remove('highlight');
-        }
-        tr.classList.add('highlight');
-
-        let daily2 = await getDaily(i._id);
-        if (daily2.courses.length !== 0) {
-          console.log(daily2);
-          let menu = `<table><tr> <td>course name</td> <td>price</td> <td>diets</td> </tr>`;
-          for (let course of daily2.courses) {
-            menu += `<tr> <td>${course.name}</td><td>${course.price}</td><td>${course.diets}</td> </tr>`;
-          }
-          menu += '</table>';
-          dialog.innerHTML = menu;
-        }
-
-        let innerhtml2 = `<p>${i.name}</p> <p>${i.address}</p> <p>${i.postalCode}</p> <p>${i.city}</p> <p>${i.phone}</p> <p>${i.company}</p>`;
-
-        dialog.innerHTML += innerhtml2;
-        dialog.appendChild(button);
-        dialog.showModal();
-      });
-*/
+      tr.addEventListener('click', () => showRestaurantMenu(i._id));
+      marker.on('click', () => showRestaurantMenu(i._id));
 
       table.appendChild(tr);
+      table.appendChild(tr2);
     }
   } catch (error) {
     console.log(error);
