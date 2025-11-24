@@ -221,7 +221,7 @@ async function getRestaurants() {
       );
 
       marker.on('click', () => {
-        const row = document.querySelector(`tr[data-id="${id}"]`);
+        const row = document.querySelector(`tr[data-id="${i._id}"]`);
         if (!row) return;
 
         row.scrollIntoView({
