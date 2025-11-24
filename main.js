@@ -154,23 +154,20 @@ document.querySelector('#avatarclose').addEventListener('click', () => {
   document.querySelector('#avatardialog').close();
 });
 
-async function updateUser(un, pw, em, fr, av) {
+async function updateUser(fieldName, value) {
   try {
+    const bodyData = {};
+    bodyData[fieldName] = value;
+
     let response = await fetch(
       'https://media2.edu.metropolia.fi/restaurant/api/v1/users',
       {
-        method: 'put',
+        method: 'PUT',
         headers: {
           Authorization: `Bearer ${sessionStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          username: un,
-          password: pw,
-          email: em,
-          favouriteRestaurant: fr,
-          avatar: av,
-        }),
+        body: JSON.stringify(bodyData),
       }
     );
     response = await response.json();
@@ -180,8 +177,45 @@ async function updateUser(un, pw, em, fr, av) {
   }
 }
 
-document.querySelector('#updateuser').addEventListener('click', async () => {
+document.querySelector('#updateuser').addEventListener('click', () => {
   document.querySelector('#updatedialog').showModal();
+});
+document.querySelector('#updateclose').addEventListener('click', () => {
+  document.querySelector('#updatedialog').close();
+});
+document.querySelector('#update').addEventListener('click', async () => {
+  const name = document.querySelector('#name2').value;
+  const password = document.querySelector('#password2').value;
+  const email = document.querySelector('#email2').value;
+  document.querySelector('#nameerror2').textContent = '';
+  document.querySelector('#passworderror2').textContent = '';
+  document.querySelector('#emailerror2').textContent = '';
+
+  if (name.length < 3 && name.length > 0) {
+    document.querySelector('#nameerror2').textContent = 'name too short';
+    return;
+  }
+  if (password.length < 5 && password.length > 0) {
+    document.querySelector('#passworderror2').textContent =
+      'password too short';
+    return;
+  }
+  if (name.length > 2) {
+    let boolvalue = await checkUserNameAvailability(name);
+    boolvalue = await boolvalue.json();
+    console.log(boolvalue);
+    if (!boolvalue.available) {
+      document.querySelector('#nameerror2').textContent = 'username is taken';
+      return;
+    }
+    await updateUser('username', name);
+  }
+  if (password.length > 4) {
+    await updateUser('password', password);
+  }
+  if (email.length > 0) {
+    await updateUser('email', email);
+  }
 });
 
 document.querySelector('#reg').addEventListener('click', async (e) => {
