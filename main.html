@@ -20,7 +20,8 @@
   <body>
     <div class="container">
       <div class="top">
-        <button id="logreg">login/register</button>
+        <button id="logregbtn">login/register</button>
+        <button id="logoutbtn">logout</button>
       </div>
 
       <div class="left">
@@ -47,6 +48,23 @@
     </dialog>
 
     <dialog id="info"></dialog>
-    <dialog id="logreg"></dialog>
+
+    <dialog id="logregdialog">
+      <form>
+        <label for="name">name:</label>
+        <input type="text" id="name" name="name" />
+        <p id="nameerror" class="errortext"></p>
+        <label for="password">password:</label>
+        <input type="text" id="password" name="password" />
+        <p id="passworderror" class="errortext"></p>
+        <label for="email">email (only for registering):</label>
+        <input type="text" id="email" name="email" />
+        <p id="emailerror" class="errortext"></p>
+        <br />
+        <button id="log">login</button>
+        <button id="reg">register</button>
+        <button id="closelogreg">close</button>
+      </form>
+    </dialog>
   </body>
 </html>

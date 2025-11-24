@@ -7,6 +7,14 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const table = document.querySelector('#maintable');
 
+document.querySelector('#logregbtn').addEventListener('click', () => {
+  document.querySelector('#logregdialog').showModal();
+});
+document.querySelector('#closelogreg').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.querySelector('#logregdialog').close();
+});
+
 async function checkUserNameAvailability(username) {
   try {
     const response = await fetch(
@@ -20,7 +28,7 @@ async function checkUserNameAvailability(username) {
 
 async function createUser(usern, passwor, emai) {
   try {
-    const response = await fetch(
+    let response = await fetch(
       `https://media2.edu.metropolia.fi/restaurant/api/v1/users`,
       {
         method: 'POST',
@@ -35,11 +43,123 @@ async function createUser(usern, passwor, emai) {
       }
     );
     response = await response.json();
+    console.log(response);
     return response;
   } catch (error) {
     console.log(error);
   }
 }
+
+async function login(usern, passwor) {
+  try {
+    let response = await fetch(
+      `https://media2.edu.metropolia.fi/restaurant/api/v1/auth/login`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: usern,
+          password: passwor,
+        }),
+      }
+    );
+    response = await response.json();
+    sessionStorage.setItem('token', response.token);
+    //const token = sessionStorage.getItem('token');
+    //console.log(token);
+
+    console.log(response);
+    renderPage();
+    document.querySelector('#logregdialog').close();
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function getUserbyToken(token) {
+  try {
+    let response = await fetch(
+      'https://media2.edu.metropolia.fi/restaurant/api/v1/users/token',
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+    response = await response.json();
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+document.querySelector('#reg').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const name = document.querySelector('#name').value;
+  const password = document.querySelector('#password').value;
+  const email = document.querySelector('#email').value;
+  document.querySelector('#nameerror').textContent = '';
+  document.querySelector('#passworderror').textContent = '';
+  document.querySelector('#emailerror').textContent = '';
+
+  if (name == '') {
+    document.querySelector('#nameerror').textContent = 'input a username';
+    return;
+  }
+  if (name.length < 3) {
+    document.querySelector('#nameerror').textContent = 'name too short';
+    return;
+  }
+  if (password == '') {
+    document.querySelector('#passworderror').textContent = 'input a password';
+    return;
+  }
+  if (password.length < 5) {
+    document.querySelector('#passworderror').textContent = 'password too short';
+    return;
+  }
+  if (email == '') {
+    document.querySelector('#emailerror').textContent = 'input a email';
+    return;
+  }
+  let boolvalue = await checkUserNameAvailability(name);
+  boolvalue = await boolvalue.json();
+  console.log(boolvalue);
+  if (!boolvalue.available) {
+    document.querySelector('#nameerror').textContent = 'username is taken';
+    return;
+  }
+
+  const result = await createUser(name, password, email);
+  console.log(result);
+});
+
+document.querySelector('#log').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const name = document.querySelector('#name').value;
+  const password = document.querySelector('#password').value;
+  document.querySelector('#nameerror').textContent = '';
+  document.querySelector('#passworderror').textContent = '';
+  document.querySelector('#emailerror').textContent = '';
+
+  let boolvalue = await checkUserNameAvailability(name);
+  boolvalue = await boolvalue.json();
+  console.log(boolvalue);
+  if (boolvalue.available) {
+    document.querySelector('#nameerror').textContent = `username doesn't exist`;
+    return;
+  }
+  await login(name, password);
+});
 
 async function getDaily(id) {
   try {
@@ -238,4 +358,22 @@ async function getRestaurants() {
   }
 }
 
-getRestaurants();
+document.querySelector('#logoutbtn').addEventListener('click', () => {
+  sessionStorage.removeItem('token');
+  renderPage();
+});
+
+async function renderPage() {
+  getRestaurants();
+  let tokenvalid = await getUserbyToken(sessionStorage.getItem('token'));
+  console.log(tokenvalid);
+  if (tokenvalid) {
+    document.querySelector('#logregbtn').style.display = 'none';
+    document.querySelector('#logoutbtn').style.display = 'block';
+  } else {
+    document.querySelector('#logregbtn').style.display = 'block';
+    document.querySelector('#logoutbtn').style.display = 'none';
+  }
+}
+
+renderPage();
