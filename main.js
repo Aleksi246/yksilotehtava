@@ -79,14 +79,14 @@ async function login(usern, passwor) {
   }
 }
 
-async function getUserbyToken(token) {
+async function getUserbyToken() {
   try {
     let response = await fetch(
       'https://media2.edu.metropolia.fi/restaurant/api/v1/users/token',
       {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
       }
@@ -101,6 +101,88 @@ async function getUserbyToken(token) {
     console.log(error);
   }
 }
+const avatarInput = document.querySelector('#avatarInput');
+async function uploadAvatar() {
+  try {
+    const file = avatarInput.files[0];
+    if (!file) {
+      alert('select a file first');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    let response = await fetch(
+      `https://media2.edu.metropolia.fi/restaurant/api/v1/users/avatar`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+        },
+        body: formData,
+      }
+    );
+    const result = await response.json();
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+}
+document.querySelector('#avatarupdate').addEventListener('click', async () => {
+  await uploadAvatar();
+  let avatarurl = await getUserbyToken();
+  console.log(avatarurl);
+  avatarurl = avatarurl.avatar;
+  console.log(avatarurl);
+  document.querySelector(
+    '#avatarimg'
+  ).src = `https://media2.edu.metropolia.fi/restaurant/uploads/${avatarurl}`;
+});
+
+document.querySelector('#changeavatar').addEventListener('click', async () => {
+  let avatarurl = await getUserbyToken();
+  console.log(avatarurl);
+  avatarurl = avatarurl.avatar;
+  console.log(avatarurl);
+  document.querySelector(
+    '#avatarimg'
+  ).src = `https://media2.edu.metropolia.fi/restaurant/uploads/${avatarurl}`;
+  document.querySelector('#avatardialog').showModal();
+});
+document.querySelector('#avatarclose').addEventListener('click', () => {
+  document.querySelector('#avatardialog').close();
+});
+
+async function updateUser(un, pw, em, fr, av) {
+  try {
+    let response = await fetch(
+      'https://media2.edu.metropolia.fi/restaurant/api/v1/users',
+      {
+        method: 'put',
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: un,
+          password: pw,
+          email: em,
+          favouriteRestaurant: fr,
+          avatar: av,
+        }),
+      }
+    );
+    response = await response.json();
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+document.querySelector('#updateuser').addEventListener('click', async () => {
+  document.querySelector('#updatedialog').showModal();
+});
 
 document.querySelector('#reg').addEventListener('click', async (e) => {
   e.preventDefault();
@@ -364,16 +446,19 @@ document.querySelector('#logoutbtn').addEventListener('click', () => {
 });
 
 async function renderPage() {
-  getRestaurants();
-  let tokenvalid = await getUserbyToken(sessionStorage.getItem('token'));
+  let tokenvalid = await getUserbyToken();
   console.log(tokenvalid);
   if (tokenvalid) {
-    document.querySelector('#logregbtn').style.display = 'none';
-    document.querySelector('#logoutbtn').style.display = 'block';
+    document.querySelector('#logregbtn').style.display = 'none'; //this happens if token is valid
+    document.querySelectorAll('.hiddenwhileloggedout').forEach((btn) => {
+      btn.style.display = 'block';
+    });
   } else {
     document.querySelector('#logregbtn').style.display = 'block';
-    document.querySelector('#logoutbtn').style.display = 'none';
+    document.querySelectorAll('.hiddenwhileloggedout').forEach((btn) => {
+      btn.style.display = 'none';
+    });
   }
 }
-
+getRestaurants();
 renderPage();

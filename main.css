@@ -23,7 +23,7 @@ body {
 .top {
   grid-area: header;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   text-align: center;
   background-color: aqua;
 }
@@ -84,5 +84,8 @@ td {
   font-size: 12px;
 }
 #logoutbtn {
+  display: none;
+}
+.hiddenwhileloggedout {
   display: none;
 }
