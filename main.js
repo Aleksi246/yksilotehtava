@@ -7,6 +7,40 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 const table = document.querySelector('#maintable');
 
+async function checkUserNameAvailability(username) {
+  try {
+    const response = await fetch(
+      `https://media2.edu.metropolia.fi/restaurant/api/v1/users/available/${username}`
+    );
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function createUser(usern, passwor, emai) {
+  try {
+    const response = await fetch(
+      `https://media2.edu.metropolia.fi/restaurant/api/v1/users`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: usern,
+          password: passwor,
+          email: emai,
+        }),
+      }
+    );
+    response = await response.json();
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 async function getDaily(id) {
   try {
     const response = await fetch(
@@ -178,6 +212,23 @@ async function getRestaurants() {
 
       tr.addEventListener('click', () => showRestaurantMenu(i._id));
       marker.on('click', () => showRestaurantMenu(i._id));
+
+      tr.addEventListener('click', () =>
+        map.flyTo([i.location.coordinates[1], i.location.coordinates[0]], 18)
+      );
+      marker.on('click', () =>
+        map.flyTo([i.location.coordinates[1], i.location.coordinates[0]], 18)
+      );
+
+      marker.on('click', () => {
+        const row = document.querySelector(`tr[data-id="${id}"]`);
+        if (!row) return;
+
+        row.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      });
 
       table.appendChild(tr);
       table.appendChild(tr2);
