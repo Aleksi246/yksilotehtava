@@ -89,6 +89,11 @@ td {
 .hiddenwhileloggedout {
   display: none;
 }
-.favourite{
-  background-color: gold
+.favourite {
+  background-color: gold;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }

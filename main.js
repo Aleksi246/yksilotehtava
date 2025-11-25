@@ -71,7 +71,9 @@ async function login(usern, passwor) {
     //console.log(token);
 
     console.log(response);
-    renderPage();
+    await renderPage();
+    table.innerHTML = '';
+    await getRestaurants();
     document.querySelector('#logregdialog').close();
     return response;
   } catch (error) {
@@ -350,7 +352,6 @@ async function showRestaurantMenu(restaurantId) {
   const row = document.querySelector(`tr[data-id="${restaurantId}"]`);
   const nextRow = row.nextElementSibling;
 
-
   row.classList.add('highlight');
   nextRow.classList.add('highlight');
 
@@ -394,24 +395,22 @@ async function showRestaurantMenu(restaurantId) {
   const user = await getUserbyToken();
   let favoritubtn = document.createElement('button');
   favoritubtn.textContent = 'favorite';
-  
+
   if (user) {
     favoritubtn.style.display = 'inline-block';
   } else {
     favoritubtn.style.display = 'none';
   }
-  favoritubtn.addEventListener('click', async() => {
-    console.log('hey')
-    await updateUser('favouriteRestaurant',restaurantId)
+  favoritubtn.addEventListener('click', async () => {
+    console.log('hey');
+    await updateUser('favouriteRestaurant', restaurantId);
     for (let k of document.querySelectorAll('tr')) {
-    k.classList.remove('favourite');
+      k.classList.remove('favourite');
 
-    row.classList.add('favourite');
-  nextRow.classList.add('favourite');
-  }
-
-  })
-
+      row.classList.add('favourite');
+      nextRow.classList.add('favourite');
+    }
+  });
 
   let infobtn = document.createElement('button');
   infobtn.textContent = 'info';
@@ -472,6 +471,53 @@ async function showRestaurantMenu(restaurantId) {
   menuTable.appendChild(buttonRow);
 }
 
+document.querySelector('#infobtn2').addEventListener('click', async () => {
+  const infodialog2 = document.querySelector('#info2');
+  infodialog2.innerHTML = '';
+
+  const user = await getUserbyToken();
+
+  const username = user.username;
+  const email = user.email ?? 'Unknown';
+  const avatar = user.avatar
+    ? `https://media2.edu.metropolia.fi/restaurant/uploads/${user.avatar}`
+    : '';
+
+  let favouriteName = 'None';
+
+  if (user.favouriteRestaurant) {
+    try {
+      const favRest = await getRestaurant(user.favouriteRestaurant);
+      if (favRest && favRest.name) favouriteName = favRest.name;
+    } catch (_) {}
+  }
+
+  let html = `
+    <p>User Information</p>
+    <ul>
+      <li>username: ${username}</li>
+      <li>email: ${email}</li>
+      <li>favourite restaurant: ${favouriteName}</li>
+  `;
+
+  if (avatar) {
+    html += `<li><img src="${avatar}" alt="avatar"></li>`;
+  } else {
+    html += `<li>no avatar uploaded</li>`;
+  }
+
+  html += `</ul>`;
+
+  infodialog2.innerHTML = html;
+
+  const closeButton = document.createElement('button');
+  closeButton.textContent = 'close';
+  closeButton.addEventListener('click', () => infodialog2.close());
+
+  infodialog2.appendChild(closeButton);
+  infodialog2.showModal();
+});
+
 async function getRestaurants() {
   try {
     const user = await getUserbyToken();
@@ -503,13 +549,12 @@ async function getRestaurants() {
       let tr2 = document.createElement('tr');
       tr2.classList.add('hidden-row');
 
-      
-      if(i._id == user?.favouriteRestaurant){
+      if (i._id == user?.favouriteRestaurant) {
         //console.log('i._id: '+ i._id )
-      //console.log('user fr: '+ user.favouriteRestaurant )
-        
-        tr.classList.add('favourite')
-        tr2.classList.add('favourite')
+        //console.log('user fr: '+ user.favouriteRestaurant )
+
+        tr.classList.add('favourite');
+        tr2.classList.add('favourite');
       }
       // breaks logged out because user.fr doesnt exist
 
