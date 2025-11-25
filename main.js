@@ -390,6 +390,15 @@ async function showRestaurantMenu(restaurantId) {
   weeklyButton.textContent = 'weekly';
   weeklyButton.id = 'weeklyButton';
 
+  let favoritubtn = document.createElement('button');
+  favoritubtn.textContent = 'favorite';
+  const user = await getUserbyToken();
+  if (user) {
+    favoritubtn.style.display = 'inline-block';
+  } else {
+    favoritubtn.style.display = 'none';
+  }
+
   let infobtn = document.createElement('button');
   infobtn.textContent = 'info';
 
@@ -441,6 +450,8 @@ async function showRestaurantMenu(restaurantId) {
 
   buttonCell.appendChild(weeklyButton);
   buttonCell.appendChild(infobtn);
+  buttonCell.appendChild(favoritubtn);
+
   buttonRow.appendChild(buttonCell);
 
   const menuTable = nextRow.querySelector('#menuTable');
