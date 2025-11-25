@@ -176,6 +176,36 @@ async function updateUser(fieldName, value) {
     console.log(error);
   }
 }
+document.querySelector('#deleteuser').addEventListener('click', () => {
+  document.querySelector('#deletedialog').showModal();
+});
+document.querySelector('#no').addEventListener('click', () => {
+  document.querySelector('#deletedialog').close();
+});
+document.querySelector('#yes').addEventListener('click', async () => {
+  document.querySelector('#deletedialog').showModal();
+  deleteUser();
+  document.querySelector('#deletedialog').close();
+});
+async function deleteUser() {
+  try {
+    let response = await fetch(
+      `https://media2.edu.metropolia.fi/restaurant/api/v1/users`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+        },
+      }
+    );
+    const result = await response.json();
+    renderPage();
+    console.log(result);
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 document.querySelector('#updateuser').addEventListener('click', () => {
   document.querySelector('#updatedialog').showModal();
