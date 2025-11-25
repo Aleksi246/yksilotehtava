@@ -350,6 +350,7 @@ async function showRestaurantMenu(restaurantId) {
   const row = document.querySelector(`tr[data-id="${restaurantId}"]`);
   const nextRow = row.nextElementSibling;
 
+
   row.classList.add('highlight');
   nextRow.classList.add('highlight');
 
@@ -390,14 +391,27 @@ async function showRestaurantMenu(restaurantId) {
   weeklyButton.textContent = 'weekly';
   weeklyButton.id = 'weeklyButton';
 
+  const user = await getUserbyToken();
   let favoritubtn = document.createElement('button');
   favoritubtn.textContent = 'favorite';
-  const user = await getUserbyToken();
+  
   if (user) {
     favoritubtn.style.display = 'inline-block';
   } else {
     favoritubtn.style.display = 'none';
   }
+  favoritubtn.addEventListener('click', async() => {
+    console.log('hey')
+    await updateUser('favouriteRestaurant',restaurantId)
+    for (let k of document.querySelectorAll('tr')) {
+    k.classList.remove('favourite');
+
+    row.classList.add('favourite');
+  nextRow.classList.add('favourite');
+  }
+
+  })
+
 
   let infobtn = document.createElement('button');
   infobtn.textContent = 'info';
@@ -460,6 +474,8 @@ async function showRestaurantMenu(restaurantId) {
 
 async function getRestaurants() {
   try {
+    const user = await getUserbyToken();
+
     const response = await fetch(
       'https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants'
     );
@@ -486,6 +502,16 @@ async function getRestaurants() {
 
       let tr2 = document.createElement('tr');
       tr2.classList.add('hidden-row');
+
+      
+      if(i._id == user?.favouriteRestaurant){
+        //console.log('i._id: '+ i._id )
+      //console.log('user fr: '+ user.favouriteRestaurant )
+        
+        tr.classList.add('favourite')
+        tr2.classList.add('favourite')
+      }
+      // breaks logged out because user.fr doesnt exist
 
       tr.addEventListener('click', () => showRestaurantMenu(i._id));
       marker.on('click', () => showRestaurantMenu(i._id));

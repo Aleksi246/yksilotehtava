@@ -89,3 +89,6 @@ td {
 .hiddenwhileloggedout {
   display: none;
 }
+.favourite{
+  background-color: gold
+}
