@@ -518,6 +518,20 @@ document.querySelector('#infobtn2').addEventListener('click', async () => {
   infodialog2.showModal();
 });
 
+document.querySelector('#filterbtn').addEventListener('click', async () => {
+  const filterdialog = document.querySelector('#filterd');
+  filterdialog.showModal();
+});
+document.querySelector('#closefilter').addEventListener('click', () => {
+  const filterdialog = document.querySelector('#filterd');
+  filterdialog.close();
+});
+document.querySelector('#setfilter').addEventListener('click', () => {
+  const filterdialog = document.querySelector('#filterd');
+  filterdialog.close();
+  table.innerHTML = '';
+  getRestaurants();
+});
 async function getRestaurants() {
   try {
     const user = await getUserbyToken();
@@ -533,6 +547,13 @@ async function getRestaurants() {
     );
 
     for (let i of restaurants) {
+      if (
+        i.company != document.querySelector('#companyFilter').value &&
+        document.querySelector('#companyFilter').value != 'all'
+      ) {
+        console.log('works');
+        continue;
+      }
       const marker = L.marker([
         i.location.coordinates[1],
         i.location.coordinates[0],

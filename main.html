@@ -60,7 +60,16 @@
 
     <dialog id="info"></dialog>
     <dialog id="info2"></dialog>
-    <dialog id="filter"></dialog>
+    <dialog id="filterd">
+      <label for="companyFilter">choose company:</label>
+      <select id="companyFilter">
+        <option value="all">all</option>
+        <option value="Sodexo">sodexo</option>
+        <option value="Compass Group">compass group</option>
+      </select>
+      <button id="setfilter">set filter</button>
+      <button id="closefilter">close</button>
+    </dialog>
 
     <dialog id="logregdialog">
       <form>
